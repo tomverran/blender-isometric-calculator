@@ -8,6 +8,7 @@ import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
 import Matrix as Mt
+import Round
 
 
 type alias Dimensions =
@@ -277,7 +278,7 @@ result dims =
         [ heading "Blender Settings"
         , resultRow "Image Width" (String.fromInt settings.width)
         , resultRow "Image Height" (String.fromInt settings.height)
-        , resultRow "Ortho Scale" (String.fromFloat settings.scale)
+        , resultRow "Ortho Scale" (settings.scale |> Round.round 5)
         ]
 
 
