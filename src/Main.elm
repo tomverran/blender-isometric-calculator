@@ -4,8 +4,8 @@ import Array
 import Browser
 import Element as El
 import Element.Border as Border
-import Element.Input as Input
 import Element.Font as Font
+import Element.Input as Input
 import Html exposing (Html)
 import Matrix as Mt
 
@@ -27,10 +27,6 @@ type alias BlenderSettings =
 
 type alias Volume =
     List Mt.Matrix
-
-
-
--- a list of vec3s
 
 
 rotateZ : Float -> Mt.Matrix
@@ -233,19 +229,38 @@ updateDimensions setter dim =
 
 field : String -> (Int -> SetDimension) -> Int -> El.Element SetDimension
 field label fn value =
-    Input.text []
-        { label = Input.labelAbove [] (El.text label)
-        , onChange = \e -> String.toInt e |> Maybe.map fn |> Maybe.withDefault (fn 0)
-        , text = String.fromInt value
-        , placeholder = Nothing
-        }
+    El.el
+        [ El.paddingXY 0 5
+        ]
+        (Input.text
+            [ Font.size 20
+            , El.paddingXY 5 10
+            ]
+            { label = Input.labelAbove [ El.centerY, El.width El.fill ] (El.text label)
+            , onChange = \e -> String.toInt e |> Maybe.map fn |> Maybe.withDefault (fn 0)
+            , text = String.fromInt value
+            , placeholder = Nothing
+            }
+        )
+
+
+heading : String -> El.Element msg
+heading what =
+    El.el
+        [ Font.size 28
+        , Font.bold
+        ]
+        (El.text what)
 
 
 resultRow : String -> String -> El.Element msg
 resultRow title contents =
     El.row
-        [ Border.solid
+        [ Border.dotted
+        , Border.widthEach { top = 0, left = 0, right = 0, bottom = 1 }
         , El.width El.fill
+        , Border.color (El.rgb255 96 96 96)
+        , El.paddingXY 0 5
         ]
         [ El.el [] (El.text title)
         , El.el [ El.alignRight, Font.bold ] (El.text (contents |> String.left 6))
@@ -258,8 +273,9 @@ result dims =
         settings =
             calculateSettings dims
     in
-    El.column []
-        [ resultRow "Image Width" (String.fromInt settings.width)
+    El.column [ El.width El.fill, El.paddingXY 0 40, El.spacingXY 0 10 ]
+        [ heading "Blender Settings"
+        , resultRow "Image Width" (String.fromInt settings.width)
         , resultRow "Image Height" (String.fromInt settings.height)
         , resultRow "Ortho Scale" (String.fromFloat settings.scale)
         ]
@@ -271,8 +287,10 @@ view dimensions =
         (El.column
             [ El.centerX
             , El.centerY
+            , El.spacingXY 0 10
             ]
-            [ field "Tile Size (px)" SetTileSize dimensions.tileSize
+            [ heading "Inputs"
+            , field "Tile Size (px)" SetTileSize dimensions.tileSize
             , field "X Size (tiles)" SetXSizeTiles dimensions.xSizeTiles
             , field "Y Size (tiles)" SetYSizeTiles dimensions.ySizeTiles
             , field "Z Size (tiles)" SetZSizeTiles dimensions.zSizeTiles
