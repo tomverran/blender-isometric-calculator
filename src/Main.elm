@@ -148,18 +148,20 @@ calculateScaleFromZ volume dimensions =
 -- each side so the hypotenuse across the top of the volume is equal to the image width
 
 
-calculateScaleFromX : Volume -> Dimensions -> Float
-calculateScaleFromX volume dimensions =
+calculateScaleFromX : Dimensions -> Float
+calculateScaleFromX dimensions =
     let
+        xSize =
+            toFloat dimensions.xSizeTiles
+
+        ySize =
+            toFloat dimensions.ySizeTiles
+
         maxDimension =
-            max
-                (size getY volume |> Maybe.withDefault 0)
-                (size getX volume |> Maybe.withDefault 0)
+            max xSize ySize
 
         hypotenuse =
-            sqrt
-                ((toFloat dimensions.xSizeTiles / maxDimension) ^ 2)
-                + ((toFloat dimensions.ySizeTiles / maxDimension) ^ 2)
+            sqrt ((xSize / maxDimension) ^ 2 + ((ySize / maxDimension) ^ 2))
     in
     maxDimension * hypotenuse
 
@@ -185,10 +187,11 @@ calculateSettings dimensions =
 
         scale =
             if width > height then
-                calculateScaleFromX volume dimensions
+                calculateScaleFromX dimensions
 
             else
-                calculateScaleFromZ volume dimensions |> Maybe.withDefault 0
+                calculateScaleFromZ volume dimensions
+                    |> Maybe.withDefault 0
     in
     { scale = scale
     , width = round width
