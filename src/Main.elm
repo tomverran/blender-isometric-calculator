@@ -264,7 +264,7 @@ resultRow title contents =
         , El.paddingXY 0 5
         ]
         [ El.el [] (El.text title)
-        , El.el [ El.alignRight, Font.bold ] (El.text (contents |> String.left 6))
+        , El.el [ El.alignRight, Font.bold ] (El.text contents)
         ]
 
 
