@@ -160,10 +160,12 @@ calculateScaleFromX dimensions =
         maxDimension =
             max xSize ySize
 
-        hypotenuse =
-            sqrt ((xSize / maxDimension) ^ 2 + ((ySize / maxDimension) ^ 2))
+        hypotenuseRatio = 
+            sqrt 2
+
     in
-    maxDimension * hypotenuse
+    hypotenuseRatio + ((hypotenuseRatio / 2) * (maxDimension - 1))
+
 
 
 calculateSettings : Dimensions -> BlenderSettings
