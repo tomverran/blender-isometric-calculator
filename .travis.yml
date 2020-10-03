@@ -17,8 +17,9 @@ deploy:
   upload-dir: blender
   acl: public_read
 after_deploy:
-- pip install awscli
-- 
+- pip install --user awscli
+- export PATH="${PATH}:$(python3 -c 'import site; print(site.USER_BASE)')/bin"
+- aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} --paths "/*" > /dev/null
 env:
   global:
   - secure: F6spEXYKjxuMftQxlD6PpADEGszghve9tXEkrrybXK5Zw3kK8xtWfhAXjxsWWnO8Q/E1f7Js+8xqzUccT3ueHUGc5qegAWxdrATEA28SfjpfWCaMfXn4Jjf3+Gkejo6agdm65bDTq2R1BdW3qHO6Uy6luQCREsMsjA5l/ZvepDiCzoYREh68SajGSPpSu+bPu3vhHwwIXD0Hv2Mp4GhfXzTXajKMBzMitFAWpVRryAzQTaeRoTCFxEfww28cuGGXBtVJXZe2RFwP70pLQB8vn1o+vMRM/Qi0qqP3OJ9k2RmUAwXiKdVcQ4nVbkdTvR22XTuOCpiUKIqElk90kOMZJt1qsuznv2GBapnJlYPlnBMC/kP2vSGOlcOlMp+2+e1Z76+jh1gsoFIqZI+rKAqeThJZRXUZ2hTxL/X/Py+TXqAgSOkRqtURVH1Pw+zhmqGN6k6SsY/nXHWC9WducGqC980hf+lDPO85sy5nTbHGKGiugcDvmbtyDC7A01U3kIX0VWaaSwK9mTDijl7Ej+BdixTa9pBa40D17qUIbmsrexUaI3CWJhpIK4MrymlMmBxTMuRlwb2DNKfuQ3RYONv0An++y9vD7BWAS8uFL/+eFFwuUOSoCJ6uxlak6vnglCb6QQKujqs/HBkgd9VyFoBC25xTRJsvKDv9kDh3aj4Gi7k=
