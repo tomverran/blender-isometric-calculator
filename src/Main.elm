@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-import Array
 import Browser
 import Element as El
 import Element.Border as Border
@@ -106,66 +105,16 @@ size dimension volume =
         (volume |> List.map dimension |> List.concatMap toList |> List.minimum)
 
 
-
--- Calculate the orthographic scale for an image that is taller than it is wide
--- for this to be the case the Z size of the image is what we need to use
--- So we find out what proportion of the height is given over to the sides of the volume
--- then create a scale that would make the sides take up the whole image before reducing them
--- by the proportion we actually want the sides to take up
-
-
-calculateScaleFromZ : Volume -> Dimensions -> Maybe Float
-calculateScaleFromZ volume dimensions =
-    let
-        volArray =
-            Array.fromList volume
-
-        projectedCube =
-            createVolume 1 1 1
-                |> List.map (Mt.mul project)
-                |> Array.fromList
-
-        heightFactor =
-            Maybe.map2 (\a -> \b -> a - b)
-                (projectedCube |> Array.get 0 |> Maybe.andThen getY)
-                (projectedCube |> Array.get 4 |> Maybe.andThen getY)
-
-        proportionOfZ =
-            Maybe.map3 (\a -> \b -> \height -> (a - b) / height)
-                (volArray |> Array.get 0 |> Maybe.andThen getY)
-                (volArray |> Array.get 4 |> Maybe.andThen getY)
-                (size getY volume)
-    in
-    Maybe.map2
-        (\heightFact -> \propZ -> (toFloat dimensions.zSizeTiles * heightFact) / propZ)
-        heightFactor
-        proportionOfZ
-
-
-
--- Calculate the orthographic scale for an image that is wider than it is tall
--- We take the longest side of the image and because the image is rotated we need to scale down
--- each side so the hypotenuse across the top of the volume is equal to the image width
-
-
-calculateScaleFromX : Dimensions -> Float
-calculateScaleFromX dimensions =
+calculateScale : Volume -> Maybe Float
+calculateScale volume =
     let
         xSize =
-            toFloat dimensions.xSizeTiles
+            size getX volume
 
         ySize =
-            toFloat dimensions.ySizeTiles
-
-        maxDimension =
-            max xSize ySize
-
-        hypotenuseRatio = 
-            sqrt 2
-
+            size getY volume
     in
-    hypotenuseRatio + ((hypotenuseRatio / 2) * (maxDimension - 1))
-
+    Maybe.map2 max xSize ySize
 
 
 calculateSettings : Dimensions -> BlenderSettings
@@ -174,26 +123,21 @@ calculateSettings dimensions =
         sideLength =
             toFloat dimensions.tileSize / sqrt 2
 
-        volume =
+        tileVolume =
             createVolume
-                (toFloat dimensions.xSizeTiles * sideLength)
-                (toFloat dimensions.ySizeTiles * sideLength)
-                (toFloat dimensions.zSizeTiles * sideLength)
+                (toFloat dimensions.xSizeTiles)
+                (toFloat dimensions.ySizeTiles)
+                (toFloat dimensions.zSizeTiles)
                 |> List.map (Mt.mul project)
 
         width =
-            size getX volume |> Maybe.withDefault 0
+            (size getX tileVolume |> Maybe.withDefault 0) * sideLength
 
         height =
-            size getY volume |> Maybe.withDefault 0
+            (size getY tileVolume |> Maybe.withDefault 0) * sideLength
 
         scale =
-            if width > height then
-                calculateScaleFromX dimensions
-
-            else
-                calculateScaleFromZ volume dimensions
-                    |> Maybe.withDefault 0
+            calculateScale tileVolume |> Maybe.withDefault 0
     in
     { scale = scale
     , width = round width
